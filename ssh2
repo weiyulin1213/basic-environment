@@ -1,9 +1,6 @@
 #!/bin/bash
 
 hosts=(weiyuyl2@linux.ews.illinois.edu c0210009@linux1.cs.nctu.edu.tw wei-yu@140.113.69.95 localadmin@fa16-cs241-302.cs.illinois.edu)
-#host1="weiyuyl2@linux.ews.illinois.edu"
-#host2="c0210009@linux1.cs.nctu.edu.tw"
-#host3="wei-yu@140.113.69.95"
 index=1
 max_hosts=0
 for host in ${hosts[@]}; do
@@ -17,7 +14,7 @@ _main(){
 	done
 	read n
 	if [ $n -le 0 ] || [ $n -gt $max_hosts ]; then
-		echo "Try again."
+		echo "Wrong number. Try again."
 		exit 0
 	else
 		echo "sshing to [$n]"
