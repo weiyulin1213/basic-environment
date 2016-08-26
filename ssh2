@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hosts=(weiyuyl2@linux.ews.illinois.edu c0210009@linux1.cs.nctu.edu.tw wei-yu@140.113.69.95 weiyuyl2@fa16-cs241-000.cs.illinois.edu)
+hosts=(weiyuyl2@linux.ews.illinois.edu c0210009@linux1.cs.nctu.edu.tw wei-yu@140.113.69.95 localadmin@fa16-cs241-302.cs.illinois.edu)
 #host1="weiyuyl2@linux.ews.illinois.edu"
 #host2="c0210009@linux1.cs.nctu.edu.tw"
 #host3="wei-yu@140.113.69.95"
