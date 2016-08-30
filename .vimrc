@@ -14,7 +14,7 @@ filetype indent on
 " 註：<LEFT> 為向右鍵字元
  
 inoremap ( ()<LEFT>
-inoremap ) <RIGHT>
+inoremap () ()<RIGHT>
 inoremap < <><LEFT>
 inoremap [ []<LEFT> 
 inoremap ] <RIGHT> 
