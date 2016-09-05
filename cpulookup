@@ -1,6 +1,13 @@
 #! /bin/sh
+#########################################################
+#  版本資訊:v1.1										#
+#  作者:weiyulin1213									#
+#  程式名稱:cpulookup									#
+#########################################################
 cpudata=".passmark.cpudata"
 videocarddata=".passmark.videocard"
+taegetsite_cpu="http://www.cpubenchmark.net/cpu_list.php"
+targetsite_video="http://www.videocardbenchmark.net/gpu_list.php"
 cpu=0;
 video=0;
 update=0;
@@ -23,37 +30,39 @@ done
 
 _update(){
 	echo "Updating cpu database..."
-	curl http://www.cpubenchmark.net/cpu_list.php > $cpudata
+	curl ${taegetsite_cpu} > ${cpudata}
 	echo "Updating video card database..."
-	curl www.videocardbenchmark.net/gpu_list.php > $videocarddata
+	curl ${targetsite_video} > ${videocarddata}
 	echo "Database update complete.";
-	if [ $cpu -eq 2699 ] && [ $video -eq 980 ]; then
-		exit 0
+}
+_main(){
+	# checking update option
+	if [ $update -eq 1 ]; then
+		_update ;
+	fi
+	#starts to look for specified model information.
+	if [ -e $cpudata ]; then
+		if ! [ $cpu -eq 0 ]; then
+		cat $cpudata |grep -i $cpu | sed 's/</>/g' |\
+		cut -d">" -f 7,13,17 |awk 'BEGIN{FS=">"}\
+		{printf("\t%s\tscore:%d\trank:%d\n",$1,$2,$3)}'
+		fi
+	else
+		echo "cpu database missing."
+		echo "If this is the first time you run this script. Please type ./cpulookup -u to build cpu database."
+		echo "You can type ./cpulookup -h to see more help."
+	fi
+	if [ -e $videocarddata ]; then
+		if ! [ $video -eq 0 ]; then
+		cat $videocarddata |grep -i --color=auto  $video | sed 's/</>/g' |\
+		cut -d">" -f 7,13,17 |awk 'BEGIN{FS=">"}\
+		{printf("\t%s\tscore:%d\trank:%d\n",$1,$2,$3)}'
+		fi
+	else
+		echo "video card database missing."
+		echo "If this is the first time you run this script. Please type ./cpulookup -u to build cpu database."
+		echo "You can type ./cpulookup -h to see more help."
 	fi
 }
-if [ $update -eq 1 ]; then
-	_update ;
-fi
-#starts to look for specify model information.
-if [ -e $cpudata ]; then
-	if ! [ $cpu -eq 0 ]; then
-	cat $cpudata |grep -i $cpu | sed 's/</>/g' |\
-	cut -d">" -f 7,13,17 |awk 'BEGIN{FS=">"}\
-	{printf("\t%s\tscore:%d\trank:%d\n",$1,$2,$3)}'
-	fi
-else
-	echo "cpu database missing."
-	echo "If this is the first time you run this script. Please type ./cpulookup -u to build cpu database."
-	echo "You can type ./cpulookup -h to see more help."
-fi
-if [ -e $videocarddata ]; then
-	if ! [ $video -eq 0 ]; then
-	cat $videocarddata |grep -i --color=auto  $video | sed 's/</>/g' |\
-	cut -d">" -f 7,13,17 |awk 'BEGIN{FS=">"}\
-	{printf("\t%s\tscore:%d\trank:%d\n",$1,$2,$3)}'
-	fi
-else
-	echo "video card database missing."
-	echo "If this is the first time you run this script. Please type ./cpulookup -u to build cpu database."
-	echo "You can type ./cpulookup -h to see more help."
-fi
+
+_main
