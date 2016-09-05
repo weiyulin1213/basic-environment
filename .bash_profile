@@ -8,7 +8,6 @@ alias ..="cd ../"
 alias ...="cd ../../"
 alias jtop="htop"
 alias ㄔㄣ="htop"
-alias ㄋㄠ="ls"
 export PAGER=most
 
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
