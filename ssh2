@@ -13,6 +13,7 @@ _main(){
 		index=`expr $index + 1`
 	done
 	read n
+	${n:?No input. Exiting...}
 	if [ $n -le 0 ] || [ $n -gt $max_hosts ]; then
 		echo "Wrong number. Try again."
 		exit 0
