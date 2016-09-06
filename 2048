@@ -1,0 +1,480 @@
+#! /bin/sh
+
+stty -icanon time 0 min 0
+height=19
+width=45
+tmp_cmd=".2048.cmd"
+tmp_map=".2048.map"
+tmp_num1=".2048.num1"
+tmp_num2=".2048.num2"
+tmp_num3=".2048.num3"
+tmp_cap=".2048.capacity"
+save_1=".2048-1.save"
+save_2=".2048-2.save"
+save_3=".2048-3.save"
+save_4=".2048-4.save"
+save_5=".2048-5.save"
+
+trap control_c SIGINT
+control_c(){
+    stty sane
+}
+_print_welcome(){
+    dialog --ok-label "Play a game" --msgbox "Welocom to game 2048!" $height $width
+}
+
+_print_menu(){
+    dialog --menu "command line 2048" $height $width 5  \
+        "N" "New game - Start a new 2048 game" \
+        "R" "Resume - resume previous game" \
+        "L" "Load - Load from previous saved game" \
+        "S" "Save - Save current game status" \
+        "Q" "Quit" 2> $tmp_cmd
+}
+_print_win(){
+	dialog --ok-label "return to menu" --msgbox "Congratulations! You win!!!!!!" $height $width
+	_clear_tmp 
+	main
+}
+_gameover(){
+	dialog --ok-label "return to menu" --msgbox "Game over QAQ" $height $width
+	_clear_tmp
+	main
+}
+_roll(){
+    echo $(jot -r 1 1 $1)
+}
+_random_num(){
+    tmp=$(_roll 100)
+    if [ ! -z $tmp ] && [ $tmp -gt 50 ]; then
+        echo "2"
+    else
+        echo "4"
+    fi
+}
+_random_brick(){
+    if [ $capacity != "" ] && [ $capacity -gt 0 ]; then
+        index=$(_roll $capacity)
+        cat $tmp_num3 | awk 'BEGIN{
+			index_='$index'
+			num='$(_random_num)'
+			if(num!=2 && num!=4)num=2
+		}
+		{
+			if($17==1){
+				for(i=1;i<=17;i++ )
+					printf("%d ",$i)
+				printf("\n")
+			}
+			else{
+            	for(i=1;i<=16;i++){
+					if(index_==1 && $i==0){
+                    	printf("%d ",num)
+                    	index_=index_-1
+                	}
+                	else if(index_!=1 && $i==0){
+                   		index_=index_ - 1
+                    	printf("%d ", $i)
+                	}
+                	else
+                    	printf("%d ", $i)
+            	}
+			}
+        }' > $tmp_num1
+    fi
+
+	awk 'BEGIN{cap=0}{
+			for(i=1;i<=NF;i++)
+				if($i==0)cap++
+				else if ($i==64){
+					next
+				}
+	}
+	{
+		printf("%d",cap)
+	}' $tmp_num1 > $tmp_cap
+    capacity=`cat $tmp_cap`
+	if [ $capacity -eq 0 ]; then 
+		_gameover
+	fi
+	if [ -z $capacity ]; then
+		_print_win
+	fi
+	echo "capacity:" $capacity
+	#echo "num1:"
+    #cat $tmp_num1
+	#echo ""
+}
+_new_game(){
+    #index=$(_roll 16)
+    capacity=16
+    echo "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" > $tmp_num3
+    _random_brick
+	echo `cat $tmp_num1` > $tmp_num3
+	sleep 0.03
+    _random_brick
+}
+
+_print_game(){
+    echo `cat $tmp_num1` | awk   '{
+        printf("---------------------------------\n")
+        printf("|       |       |       |       |\n")
+        printf("|")
+        for(i=1;i<=4;i++)
+            if($i==0)
+                printf("       |")
+            else
+                printf("  %4d |",$i)
+        printf("\n")
+        printf("|       |       |       |       |\n")
+        printf("---------------------------------\n")
+        printf("|       |       |       |       |\n")
+        printf("|")
+        for(i=5;i<=8;i++)
+            if($i==0)
+                printf("       |")
+            else
+                printf("  %4d |",$i)
+        printf("\n")
+        printf("|       |       |       |       |\n")
+        printf("---------------------------------\n")
+        printf("|       |       |       |       |\n")
+        printf("|")
+        for(i=9;i<=12;i++)
+            if($i==0)
+                printf("       |")
+            else
+                printf("  %4d |",$i)
+        printf("\n")
+        printf("|       |       |       |       |\n")
+        printf("---------------------------------\n")
+        printf("|       |       |       |       |\n")
+        printf("|")
+        for(i=13;i<=16;i++)
+            if($i==0)
+                printf("       |")
+            else
+                printf("  %4d |",$i)
+        printf("\n")
+        printf("|       |       |       |       |\n")
+        printf("---------------------------------\n")
+    }' > $tmp_map
+    dialog --no-collapse --infobox "`cat $tmp_map`" $height $width
+}
+_shuffle(){
+	awk 'BEGIN{
+		direc="'$1'"
+	}
+	{
+		for(i=1;i<=16;i++){
+			map[i-1]=$i
+			pre[i-1]=$i
+		}
+		if(direc=="w"){
+			for(i=0;i<16;i++)
+				if(map[i]=="0")
+					for(j=i+4;j<16;j+=4)
+						if(map[j]!="0"){
+							map[i]=map[j]
+							map[j]=0
+							break
+						}
+		}
+		else if(direc=="s"){
+			for(i=15;i>=0;i--)
+				if(map[i]==0)
+					for(j=i-4;j>=0;j-=4)
+						if(map[j]!=0){
+							map[i]=map[j]
+							map[j]=0
+							break
+						}
+		}
+		else if(direc=="d"){
+			for(i=15;i>=0;i--)
+				if(map[i]==0)
+					for(j=i-1;j>=int(i/4)*4;j--)
+						if(map[j]!=0){
+							map[i]=map[j]
+							map[j]=0
+							break
+						}
+		}
+		else if(direc=="a"){
+			for(i=0;i<16;i++)
+				if(map[i]==0)
+					for(j=i+1;j<(int(i/4)+1)*4;j++)
+						if(map[j]!=0){
+							map[i]=map[j]
+							map[j]=0
+							break
+						}
+		}
+		else{}
+	}
+	END{
+		count=0
+		for(i=0;i<16;i++)
+			if(pre[i]!=map[i])break
+			else count++
+		
+		for(i=0;i<16;i++)
+			printf("%d ",map[i])
+		if(count==16)
+			printf("1 ")
+		else
+			printf("0 ")
+		printf("\n")
+	}' $tmp_num2 > $tmp_num3
+	#echo "num3:" 
+	#cat $tmp_num3
+	#echo ""
+}
+_merge(){
+	awk 'BEGIN{
+		direc="'$1'"
+	}
+	{
+		for(i=1;i<=16;i++)map[i-1]=$i
+		if(direc=="w" || direc=="a"){
+			for(x=0;x<4;x++)
+				for(y=0;y<4;y++)
+					if(map[4*x+y]!=0){
+						index_=4*x+y
+						if(direc=="w"){
+							for(i=4*(x+1)+y;i<16;i+=4){
+								if(map[index_]==map[i]){
+									map[index_]=map[index_]*2
+									map[i]=0
+									break
+								}
+								else if(map[i]==0) continue
+								else break
+							}
+						}
+						else if(direc=="a"){
+							for(i=4*x+y+1;i<4*(x+1);i++){
+								if(map[index_]==map[i]){
+									map[index_]=map[index_]*2
+									map[i]=0
+									break
+								}
+								else if(map[i]==0) continue
+								else break
+							}
+						}				
+					}
+		}
+		else if(direc=="s" || direc=="d"){
+			for(x=3;x>=0;x--)
+				for(y=3;y>=0;y--)
+					if(map[4*x+y]!=0){
+						index_=4*x+y
+						if(direc=="s"){
+							for(i=4*(x-1)+y;i>=0;i-=4){
+								if(map[index_]==map[i]){
+									map[index_]=map[index_]*2
+									map[i]=0
+									break
+								}
+								else if(map[i]==0) continue
+								else break
+							}
+						}
+						else if(direc=="d"){
+							for(i=4*x+y-1;i>=4*x;i--){
+								if(map[index_]==map[i]){
+									map[index_]=map[index_]*2
+									map[i]=0
+									break
+								}
+								else if(map[i]==0) continue
+								else break
+							}
+						}
+					}
+		}
+		else{}
+	}
+	END{
+		for(i=0;i<16;i++)
+			printf("%d ",map[i])
+		printf("\n")
+	}' $tmp_num1 > $tmp_num2
+	#echo "num2:" 
+	#cat $tmp_num2
+	#echo ""
+}
+
+_move(){
+	_merge $1
+	#sleep 0.01
+	#num=$(echo `cat $tmp_num2`)
+	#sleep 0.01
+	_shuffle $1
+	#sleep 0.01
+	_random_brick
+}
+
+_play(){
+    _print_game
+    while true ; do
+        read  cmd
+        sleep 0.02
+        #echo $cmd
+        if [ ! -z $cmd ] && [ $cmd = "q" ]; then
+            return 0
+		elif [ ! -z $cmd ] && [ $cmd = "w" ]; then
+			_move $cmd
+			_print_game
+		elif [ ! -z $cmd ] && [ $cmd = "a" ]; then
+			_move $cmd
+			_print_game
+		elif [ ! -z $cmd ] && [ $cmd = "s" ]; then
+			_move $cmd
+			_print_game
+		elif [ ! -z $cmd ] && [ $cmd = "d" ]; then
+			_move $cmd
+			_print_game
+        elif [ ! -z $cmd ]; then
+            _print_game
+        fi
+    done
+}
+
+_save_menu(){
+	if [ -e $save_1 ]; then
+		text_1="Record 1"
+	else
+		text_1="empty slot 1"
+	fi
+	if [ -e $save_2 ]; then
+		text_2="Record 2"
+	else
+		text_2="empty slot 2"
+	fi
+	if [ -e $save_3 ]; then
+		text_3="Record 3"
+	else
+		text_3="empty slot 3"
+	fi
+	if [ -e $save_4 ]; then
+		text_4="Record 4"
+	else
+		text_4="empty slot 4"
+	fi
+	if [ -e $save_5 ]; then
+		text_5="Record 5"
+	else
+		text_5="empty slot 5"
+	fi
+    dialog --menu "Save menu" $height $width 5  \
+        "1" "$text_1" \
+        "2" "$text_2" \
+        "3" "$text_3" \
+        "4" "$text_4" \
+        "5" "$text_5" 2> $tmp_cmd
+	case `cat $tmp_cmd` in
+		1)cp -f $tmp_num1 $save_1;;
+		2)cp -f $tmp_num1 $save_2;;
+		3)cp -f $tmp_num1 $save_3;;
+		4)cp -f $tmp_num1 $save_4;;
+		5)cp -f $tmp_num1 $save_5;;
+	esac
+	if [ ! -z `cat $tmp_cmd` ]; then
+		dialog --msgbox "Your game progress has been saved!" $height $width
+	fi
+}
+_load_menu(){
+	if [ -e $save_1 ]; then
+		text_1="Record 1"
+	else
+		text_1="empty slot 1"
+	fi
+	if [ -e $save_2 ]; then
+		text_2="Record 2"
+	else
+		text_2="empty slot 2"
+	fi
+	if [ -e $save_3 ]; then
+		text_3="Record 3"
+	else
+		text_3="empty slot 3"
+	fi
+	if [ -e $save_4 ]; then
+		text_4="Record 4"
+	else
+		text_4="empty slot 4"
+	fi
+	if [ -e $save_5 ]; then
+		text_5="Record 5"
+	else
+		text_5="empty slot 5"
+	fi
+	dialog --menu "Load menu" $height $width 5  \
+        "1" "$text_1" \
+        "2" "$text_2" \
+        "3" "$text_3" \
+        "4" "$text_4" \
+        "5" "$text_5" 2> $tmp_cmd
+	case `cat $tmp_cmd` in
+		1)cp -f $save_1 $tmp_num1;rm -f $save_1;;
+		2)cp -f $save_2 $tmp_num1;rm -f $save_2;;
+		3)cp -f $save_3 $tmp_num1;rm -f $save_3;;
+		4)cp -f $save_4 $tmp_num1;rm -f $save_4;;
+		5)cp -f $save_5 $tmp_num1;rm -f $save_5;;
+	esac
+	if [ ! -z `cat $tmp_cmd` ]; then
+		dialog --msgbox "Game has been loaded!" $height $width
+		_play
+	fi
+
+}
+_clear_tmp(){
+	if [ -e $tmp_cmd ];then
+    	rm $tmp_cmd 
+	fi
+	if [ -e $tmp_num1 ];then
+       	rm $tmp_num1 
+	fi
+	if [ -e $tmp_num2 ];then
+       	rm $tmp_num2 
+	fi
+	if [ -e $tmp_num3 ];then
+       	rm $tmp_num3 
+	fi
+	if [ -e $tmp_map ];then
+       	rm $tmp_map 
+	fi
+	if [ -e $tmp_cap ];then
+       	rm $tmp_cap 
+	fi
+}
+main(){
+	while true; do
+    	_print_menu
+    	cmd=`cat $tmp_cmd`
+    	if [ ! -z $cmd ] && [ $cmd = "Q" ]; then
+			_clear_tmp
+			exit 0
+    	elif [ ! -z $cmd ] && [ $cmd = "N" ]; then
+    	    _new_game
+    	    _play
+		elif [ ! -z $cmd ] && [ $cmd = "R" ]; then
+			if [ -e $tmp_num1 ]; then
+				_play
+			fi
+		elif [ ! -z $cmd ] && [ $cmd = "L" ]; then
+			_load_menu
+		elif [ ! -z $cmd ] && [ $cmd = "S" ]; then
+			_save_menu
+		elif [ -z $cmd ]; then
+			_clear_tmp
+			exit 0 
+    	fi
+	done
+}
+
+_print_welcome
+main
+
