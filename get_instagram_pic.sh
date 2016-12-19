@@ -1,14 +1,29 @@
-#!/bin/sh 
+#!/bin/bash 
 
 #parse command line argument
+_print_help(){
+	echo "./program <target url1> <url2>..."
+	exit
+}
 _parse_commandline(){
-	while getopts "p:" flag
+	while getopts "p:ht:" flag
 	do
 		case $flag in
 			"p") prefix=$OPTARG;;
+			"h") _print_help;;
 		esac
 	done
-	echo $prefix
+	index=0
+	arg=$@
+	echo ${arg[@]}
+	for ((i=$OPTIND; i<=$#; i++))
+	do
+		echo ${arg[$i]}
+		urls[$index]=${arg[$i]}
+		index=$((index+1))
+	done
+	echo ${urls[@]}
+
 }
 # this function will parse website and store image into a file
 _parse_content(){
@@ -16,8 +31,10 @@ _parse_content(){
 	for url in $@
 	do
 		http=`curl -s $url`
-		img=`expr "$http" : '.*\(https.*n\.jpg\)'`
-		curl $img > pic${i}.jpg
+		if [ $? -eq 0 ]; then
+			img=`expr "$http" : '.*\(https.*n\.jpg\)'`
+			curl $img > ${prefix}${i}.jpg
+		fi
 		i=$((i+1))
 	done
 }
