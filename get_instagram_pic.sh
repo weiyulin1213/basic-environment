@@ -1,10 +1,17 @@
 #!/bin/bash 
+#TODO
+# 1. 指定存檔路徑
+# 2. 指定檔名prefix
+# 3. 能分辨有效網址（容錯）
+# 4. 依據帳號下載所有圖片
+# 5. 下載flickr圖片
+# 6. 自動分辨網域名
 
-#parse command line argument
 _print_help(){
 	echo "./program <target url1> <url2>..."
 	exit
 }
+#parse command line argument
 _parse_commandline(){
 	while getopts "p:ht:" flag
 	do
@@ -32,6 +39,7 @@ _parse_content(){
 	do
 		http=`curl -s $url`
 		if [ $? -eq 0 ]; then
+			echo "get webpage content success..."
 			img=`expr "$http" : '.*\(https.*n\.jpg\)'`
 			curl $img > ${prefix}${i}.jpg
 		fi
