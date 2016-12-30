@@ -42,8 +42,8 @@ _main(){
 	fi
 	#starts to look for specified model information.
 	if [ -e $cpudata ]; then
-		if ! [ $cpu -eq 0 ]; then
-		cat $cpudata |grep -i $cpu | sed 's/</>/g' |\
+		if [ -n "$cpu" ]; then
+		cat $cpudata |grep -i "$cpu" | sed 's/</>/g' |\
 		cut -d">" -f 7,13,17 |awk 'BEGIN{FS=">"}\
 		{printf("\t%s\tscore:%d\trank:%d\n",$1,$2,$3)}'
 		fi
