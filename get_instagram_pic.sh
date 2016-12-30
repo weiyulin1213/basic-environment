@@ -22,15 +22,15 @@ _parse_commandline(){
 	done
 	index=0
 	arg=$@
-	echo ${arg[@]}
-	for ((i=$OPTIND; i<=$#; i++))
+	for w in $arg
 	do
-		echo ${arg[$i]}
-		urls[$index]=${arg[$i]}
-		index=$((index+1))
+		if [ `expr "$w" : ".*\(http\)"` ]; then
+			echo $w
+			urls[$index]=$w
+			index=$((index+1))
+		fi
 	done
-	echo ${urls[@]}
-
+	echo $urls
 }
 # this function will parse website and store image into a file
 _parse_content(){
@@ -51,9 +51,8 @@ _parse_content(){
 _main(){
 	_parse_commandline $@
 	if [ $# -ne 0 ]; then
-		echo $# urls imported
 		echo "parsing..."
-		_parse_content $@
+		_parse_content $urls
 	else
 		echo "usage: ./program instragram_picture_url..."
 	fi
