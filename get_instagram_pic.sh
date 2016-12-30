@@ -30,7 +30,7 @@ _parse_commandline(){
 			index=$((index+1))
 		fi
 	done
-	echo $urls
+	echo ${urls[@]}
 }
 # this function will parse website and store image into a file
 _parse_content(){
@@ -52,7 +52,7 @@ _main(){
 	_parse_commandline $@
 	if [ $# -ne 0 ]; then
 		echo "parsing..."
-		_parse_content $urls
+		_parse_content ${urls[@]}
 	else
 		echo "usage: ./program instragram_picture_url..."
 	fi
