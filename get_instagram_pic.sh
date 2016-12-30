@@ -25,12 +25,10 @@ _parse_commandline(){
 	for w in $arg
 	do
 		if [ `expr "$w" : ".*\(http\)"` ]; then
-			echo $w
 			urls[$index]=$w
 			index=$((index+1))
 		fi
 	done
-	echo ${urls[@]}
 }
 # this function will parse website and store image into a file
 _parse_content(){
