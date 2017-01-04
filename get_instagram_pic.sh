@@ -12,6 +12,7 @@ _print_help(){
 	exit
 }
 #parse command line argument
+valid_count=0
 _parse_commandline(){
 	while getopts "p:ht:" flag
 	do
@@ -24,9 +25,10 @@ _parse_commandline(){
 	arg=$@
 	for w in $arg
 	do
-		if [ `expr "$w" : ".*\(http\)"` ]; then
+		if [ `expr "$w" : ".*\(http.*instagram\)"` ]; then
 			urls[$index]=$w
 			index=$((index+1))
+			valid_count=$((valid_count+1))
 		fi
 	done
 }
@@ -49,6 +51,7 @@ _parse_content(){
 _main(){
 	_parse_commandline $@
 	if [ $# -ne 0 ]; then
+		echo "$valid_count valid urls imported."
 		echo "parsing..."
 		_parse_content ${urls[@]}
 	else
