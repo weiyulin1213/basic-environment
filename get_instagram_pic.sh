@@ -7,6 +7,11 @@
 # 5. 下載flickr圖片
 # 6. 自動分辨網域名
 
+username='!'
+tmp_file='.tmp_file01'
+python='python2.7'
+parser='parse.py'
+prefix='default'
 _print_help(){
 	echo "./program <target url1> <url2>..."
 	exit
@@ -14,11 +19,12 @@ _print_help(){
 #parse command line argument
 valid_count=0
 _parse_commandline(){
-	while getopts "p:ht:" flag
+	while getopts "p:hu:t:" flag
 	do
 		case $flag in
 			"p") prefix=$OPTARG;;
 			"h") _print_help;;
+			"u") username=$OPTARG;;
 		esac
 	done
 	index=0
@@ -46,11 +52,26 @@ _parse_content(){
 		i=$((i+1))
 	done
 }
-
+# this function will download image by username specified
+_download_by_username(){
+	curl -s https://www.instagram.com/${username}/ > $tmp_file
+	urls=(`$python $parser $tmp_file`)
+	i=0
+	mkdir ${username}
+	for url in ${urls[@]}
+	do
+		curl $url > ${username}/${prefix}${i}.jpg
+		i=$((i+1))
+	done
+	rm $tmp_file
+}
 # this is main function
 _main(){
 	_parse_commandline $@
-	if [ $# -ne 0 ]; then
+	if [ $username != '!' ]; then
+		echo "target username: $username"
+		_download_by_username
+	elif [ $# -ne 0 ]; then
 		echo "$valid_count valid urls imported."
 		echo "parsing..."
 		_parse_content ${urls[@]}
