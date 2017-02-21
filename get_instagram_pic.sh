@@ -1,19 +1,24 @@
 #!/bin/bash 
 #TODO
-# 1. 指定存檔路徑
-# 2. 指定檔名prefix
+# 1. 指定存檔路徑done
+# 2. 指定檔名prefix done
 # 3. 能分辨有效網址（容錯）
-# 4. 依據帳號下載所有圖片
+# 4. 依據帳號下載所有圖片partially done
 # 5. 下載flickr圖片
 # 6. 自動分辨網域名
+# 7. instagram tags picture download.
 
 username='!'
+tags="@"
 tmp_file='.tmp_file01'
 python='python2.7'
 parser='parse.py'
 prefix='default'
 _print_help(){
 	echo "./program <target url1> <url2>..."
+	echo "./program -u <username>"
+	echo "./program -p <file name prefix>"
+	echo "./program -t <instagram explore tags>"
 	exit
 }
 #parse command line argument
@@ -25,10 +30,12 @@ _parse_commandline(){
 			"p") prefix=$OPTARG;;
 			"h") _print_help;;
 			"u") username=$OPTARG;;
+			"t") tags=$OPTARG;;
 		esac
 	done
 	index=0
 	arg=$@
+	# support multiple input urls
 	for w in $arg
 	do
 		if [ `expr "$w" : ".*\(http.*instagram\)"` ]; then
