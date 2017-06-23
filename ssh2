@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hosts=(wylin@140.113.214.84 wylin@lxc.cs.nctu.edu.tw c0210009@lxc.cs.nctu.edu.tw weiyuyl2@linux.ews.illinois.edu c0210009@linux1.cs.nctu.edu.tw wei-yu@140.113.69.95 wylin@fa16-cs241-302.cs.illinois.edu weiyuyl2@taub.campuscluster.illinois.edu)
+hosts=(wylin@140.113.214.84 wylin@lxc.cs.nctu.edu.tw c0210009@lxc.cs.nctu.edu.tw weiyuyl2@linux.ews.illinois.edu c0210009@linux1.cs.nctu.edu.tw wei-yu@140.113.64.35 wylin@fa16-cs241-302.cs.illinois.edu weiyuyl2@taub.campuscluster.illinois.edu)
 index=1
 max_hosts=0
 port=22
