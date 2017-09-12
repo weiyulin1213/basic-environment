@@ -1,13 +1,13 @@
 #! /bin/sh
 #########################################################
-#  版本資訊:v1.1										#
+#  版本資訊:v1.2										#
 #  作者:weiyulin1213									#
 #  程式名稱:cpulookup									#
 #########################################################
 cpudata=".passmark.cpudata"
 videocarddata=".passmark.videocard"
-taegetsite_cpu="http://www.cpubenchmark.net/cpu_list.php"
-targetsite_video="http://www.videocardbenchmark.net/gpu_list.php"
+taegetsite_cpu="https://www.cpubenchmark.net/cpu_list.php"
+targetsite_video="https://www.videocardbenchmark.net/gpu_list.php"
 cpu=0;
 video=0;
 update=0;
@@ -39,6 +39,7 @@ _main(){
 	# checking update option
 	if [ $update -eq 1 ]; then
 		_update ;
+		exit
 	fi
 	#starts to look for specified model information.
 	if [ -e $cpudata ]; then
